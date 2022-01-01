@@ -16,6 +16,10 @@ def test_create_todo(test_app, monkeypatch):
     assert response.status_code == 201
     assert response.json() == test_response_payload
 
+    response = test_app.post(
+        '/todos/', json={'title': 't', 'description': 'd'})
+    assert response.status_code == 422
+
 
 def test_create_invalid_todo(test_app):
     response = test_app.post('/todos/', data=json.dumps({'title': 'title2'}))
@@ -43,6 +47,9 @@ def test_read_invalid_todo(test_app, monkeypatch):
     response = test_app.get('/todos/44')
     assert response.status_code == 404
     assert response.json()['detail'] == 'Todo not found'
+
+    response = test_app.get('/todos/0')
+    assert response.status_code == 422
 
 
 def test_read_todos(test_app, monkeypatch):
@@ -88,6 +95,9 @@ def test_update_todo(test_app, monkeypatch):
         [1, {}, 422],
         [1, {'description': 'var'}, 422],
         [44, {'title': 'asd', 'description': 'var'}, 404],
+        [1, {'title': 't', 'description': 'var'}, 422],
+        [1, {'title': 'title1', 'description': 'd'}, 422],
+        [0, {'title': 'title1', 'description': 'desc'}, 422],
     ],
 )
 def test_update_invalid_todo(test_app, monkeypatch, id, payload, status_code):
@@ -116,13 +126,16 @@ def test_remove_todo(test_app, monkeypatch):
     assert response.status_code == 200
     assert response.json() == test_data
 
+    response = test_app.delete('/todos/0/')
+    assert response.status_code == 422
+
 
 def test_remove_invalid_todo(test_app, monkeypatch):
     async def mock_get(id):
         return None
-    
+
     monkeypatch.setattr(crud, 'get', mock_get)
 
     response = test_app.delete('/todos/44/')
-    assert response.status_code  == 404
+    assert response.status_code == 404
     assert response.json()['detail'] == 'Todo not found'

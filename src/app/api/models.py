@@ -1,9 +1,9 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TodoSchema(BaseModel):
-    title: str
-    description: str
+    title: str = Field(..., min_length=3, max_length=60)
+    description: str = Field(..., min_length=3, max_length=60)
 
 
 class TodoDB(TodoSchema):

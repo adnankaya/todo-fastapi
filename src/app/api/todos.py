@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path
 from app.api import crud
 from app.api.models import TodoSchema, TodoDB
 
@@ -20,7 +20,7 @@ async def create_todo(payload: TodoSchema):
 
 
 @router.get('/{id}/', response_model=TodoDB)
-async def read_todo(id: int):
+async def read_todo(id: int = Path(..., gt=0)):
     todo = await crud.get(id)
     if not todo:
         raise HTTPException(status_code=404, detail='Todo not found')
@@ -34,7 +34,7 @@ async def read_todos():
 
 
 @router.put('/{id}/', response_model=TodoDB)
-async def update_todo(id: int, payload: TodoSchema):
+async def update_todo(payload: TodoSchema, id: int = Path(..., gt=0)):
     todo = await crud.get(id)
     if not todo:
         raise HTTPException(status_code=404, detail='Todo not found')
@@ -49,7 +49,7 @@ async def update_todo(id: int, payload: TodoSchema):
 
 
 @router.delete('/{id}/', response_model=TodoDB)
-async def delete_todo(id: int):
+async def delete_todo(id: int = Path(..., gt=0)):
     todo = await crud.get(id)
     if not todo:
         raise HTTPException(status_code=404, detail='Todo not found')
